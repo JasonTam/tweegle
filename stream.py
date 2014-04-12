@@ -40,11 +40,15 @@ class StreamListener(tweepy.StreamListener):
 if __name__ == "__main__":
 
     import secret
+    import sys
 
     auth = tweepy.OAuthHandler(secret.api_key, secret.api_secret)
     auth.set_access_token(secret.access_token_key, secret.access_token_secret)
 
-    listener = StreamListener(filename='data/data.json', limit=50)
+    filename = sys.argv[1] if len(sys.argv) > 1 else 'data/data.json'
+    limit = sys.argv[2] if len(sys.argv) > 2 else 50
+
+    listener = StreamListener(filename=filename, limit=limit)
     streamer = tweepy.Stream(auth=auth, listener=listener)
 
     locations = [-180, -90, 180, 90]
