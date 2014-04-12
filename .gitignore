@@ -57,3 +57,6 @@ docs/_build/
 # twitter secret
 secret.py
 data/
+
+# IntelliJ
+.idea
