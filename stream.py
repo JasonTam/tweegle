@@ -24,6 +24,7 @@ class StreamListener(tweepy.StreamListener):
             info['user'] = tweet['user']
             info['coordinates'] = tweet['coordinates']
             info['text'] = tweet['text']
+            info['place'] = tweet['place']
 
             self.tweets.append(info)
 
