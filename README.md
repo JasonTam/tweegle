@@ -13,3 +13,10 @@ api_secret = '<api secret>'
 access_token_key = '<access token key>'
 access_token_secret = '<access token secret>'
 ```
+
+run
+---
+To retrieve a corpus of tweets, run:
+```
+$ stream.py <filename> <number of tweets>
+```

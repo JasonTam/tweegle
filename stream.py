@@ -1,7 +1,7 @@
 import json
 import tweepy
 
-class StreamListener(tweepy.StreamListener):
+class SaveTweets(tweepy.StreamListener):
 
     def __init__(self, filename, limit):
         self.filename = filename
@@ -20,7 +20,8 @@ class StreamListener(tweepy.StreamListener):
         if data:
             tweet = json.loads(data)
 
-            if 'coordinates' in tweet:            
+            # Ignore replies and retweets
+            if 'coordinates' in tweet and not tweet['in_reply_to_user_id'] and not tweet['retweeted']:          
 
                 info = {k:tweet[k] for k in ['coordinates', 'text', 'place']}
                 info['user'] = {k:tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone', 'lang']}
@@ -48,7 +49,7 @@ if __name__ == "__main__":
     filename = sys.argv[1] if len(sys.argv) > 1 else 'data/data.json'
     limit = int(sys.argv[2]) if len(sys.argv) > 2 else 50
 
-    listener = StreamListener(filename=filename, limit=limit)
+    listener = SaveTweets(filename=filename, limit=limit)
     streamer = tweepy.Stream(auth=auth, listener=listener)
 
     locations = [-180, -90, 180, 90]
