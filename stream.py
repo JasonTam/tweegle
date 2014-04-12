@@ -23,7 +23,7 @@ class SaveTweets(tweepy.StreamListener):
             # Ignore replies and retweets
             if 'coordinates' in tweet and not tweet['in_reply_to_user_id'] and not tweet['retweeted']:          
 
-                info = {k:tweet[k] for k in ['coordinates', 'text', 'place']}
+                info = {k:tweet[k] for k in ['id', 'coordinates', 'text', 'place']}
                 info['user'] = {k:tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone', 'lang']}
 
                 self.tweets.append(info)
