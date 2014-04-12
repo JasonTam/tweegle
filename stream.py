@@ -20,11 +20,10 @@ class StreamListener(tweepy.StreamListener):
         if data:
             tweet = json.loads(data)
 
-            info = {}
-            info['user'] = tweet['user']
-            info['coordinates'] = tweet['coordinates']
-            info['text'] = tweet['text']
-            info['place'] = tweet['place']
+            user = tweet['user']
+
+            info = {k:tweet[k] for k in ['coordinates', 'text', 'place']}
+            info['user'] = {k:tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone']}
 
             self.tweets.append(info)
 
