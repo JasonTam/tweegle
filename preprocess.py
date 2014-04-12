@@ -16,9 +16,12 @@ def prune_unicode(text):
 def setup_doc_collection(tweets,
                          toknzr=PunktWordTokenizer(),
                          stemmer=nltk.PorterStemmer()):
-
-    get_terms = lambda raw_terms: \
-        [stemmer.stem(w.lower()) for w in raw_terms]
+    if stemmer:
+        get_terms = lambda raw_terms: \
+            [stemmer.stem(w.lower()) for w in raw_terms]
+    else:
+        get_terms = lambda raw_terms: \
+            [w.lower() for w in raw_terms]
 
     # Setup Text docs to contain frequent terms
     docs_terms = {}
