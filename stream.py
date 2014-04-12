@@ -20,19 +20,21 @@ class StreamListener(tweepy.StreamListener):
         if data:
             tweet = json.loads(data)
 
-            info = {k:tweet[k] for k in ['coordinates', 'text', 'place']}
-            info['user'] = {k:tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone']}
+            if 'coordinates' in tweet:            
 
-            self.tweets.append(info)
+                info = {k:tweet[k] for k in ['coordinates', 'text', 'place']}
+                info['user'] = {k:tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone', 'lang']}
 
-            if len(self.tweets) < self.limit:
+                self.tweets.append(info)
 
-                with open(self.filename, 'w') as f:
-                    json.dump(self.tweets, f)
+                if len(self.tweets) < self.limit:
 
-                return True
-            else:
-                return False
+                    with open(self.filename, 'w') as f:
+                        json.dump(self.tweets, f)
+
+                    return True
+                else:
+                    return False
 
 
 if __name__ == "__main__":
