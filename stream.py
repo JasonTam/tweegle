@@ -20,7 +20,12 @@ class StreamListener(tweepy.StreamListener):
         if data:
             tweet = json.loads(data)
 
-            self.tweets.append(tweet)
+            info = {}
+            info['user'] = tweet['user']
+            info['coordinates'] = tweet['coordinates']
+            info['text'] = tweet['text']
+
+            self.tweets.append(info)
 
             if len(self.tweets) < self.limit:
 
