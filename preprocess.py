@@ -36,6 +36,13 @@ def setup_doc_collection(tweets,
 
     return docs_terms, docs_t_collection
 
+def get_target_map(tweets):
+    tweet_classes = {
+        tweet['id']: tweet['place']['country_code']
+        for tweet in tweets
+    }
+    return tweet_classes
+
 if __name__ == "__main__":
 
     import sys
