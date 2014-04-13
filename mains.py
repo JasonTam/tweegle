@@ -1,4 +1,3 @@
-
 import json
 
 import numpy as np
@@ -17,18 +16,18 @@ import time
 import preprocess
 import features
 
+if __name__ == "__main__":
+
+	# Load data into Python Dict
+	dir_data = './data'
+	filename = 'test.json'
+	filepath = os.path.join(dir_data, filename)
+	with open(filepath, 'r') as f:
+	    tweets = json.load(f)
 
 
-# Load data into Python Dict
-dir_data = './data'
-filename = 'test.json'
-filepath = os.path.join(dir_data, filename)
-with open(filepath, 'r') as f:
-    tweets = json.load(f)
-
-
-docs_terms, docs_t_collection = preprocess.setup_doc_collection(tweets)
-targets = preprocess.get_target_map(tweets)
+	docs_terms, docs_t_collection = preprocess.setup_doc_collection(tweets)
+	targets = preprocess.get_target_map(tweets)
 
 
 
