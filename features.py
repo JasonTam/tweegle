@@ -15,7 +15,23 @@ import os
 import time
 
 
+def stem_tokens(tokens, stemmer=nltk.PorterStemmer()):
+    stemmed = []
+    for item in tokens:
+        stemmed.append(stemmer.stem(item))
+    return stemmed
 
-vocabulary = "a list of words I want to look for in the documents".split()
-vect = TfidfVectorizer(sublinear_tf=True, max_df=0.5, analyzer='word',
-           stop_words='english', vocabulary=vocabulary)
+def tokenize(raw, toknzr=PunktWordTokenizer()):
+    tokens = toknzr.tokenize(raw)
+    stems = stem_tokens(tokens)
+    return stems
+
+
+def fit_tfidf(doc_list):
+    # should be run on all training docs (all locations)
+    tfidf = TfidfVectorizer(tokenizer=tokenize,
+                            stop_words='english',
+                            lowercase=False)
+    tfs = tfidf.fit_transform(doc_list)
+    return tfidf
+

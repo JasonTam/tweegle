@@ -25,12 +25,12 @@ if __name__ == "__main__":
     # Load train data into Python Dict
     import sys
 
-    train = sys.argv[1] if len(sys.argv) > 1 else 'data/data.json'
+    train = sys.argv[1] if len(sys.argv) > 1 else 'data/train.json'
     with open(train, 'r') as f:
         tweets = json.load(f)
 
     # Preprocess data from json into data structs
-    docs_terms, docs_t_collection = preprocess.setup_doc_collection(tweets)
+    train_raw = preprocess.setup_doc_collection(tweets)
 
     # Getting location info
     targets = preprocess.get_target_map(tweets)
@@ -43,23 +43,19 @@ if __name__ == "__main__":
     classifier.le.fit(all_locations)
 
     # Combine tweets from same location
-    mega_docs = {loc:
-                 list(itertools.chain(
-                     *[docs_terms[id].tokens for id in loc_to_id[loc]]
-                 ))
-                 for loc in all_locations
-                }
+    mega_raws = {
+        loc: [train_raw[t_id] for t_id in loc_to_id[loc]]
+        for loc in all_locations
+    }
 
-    tfidf = TfidfVectorizer(stop_words='english')
+    tfidf = features.fit_tfidf(train_raw.values())
 
-    # Get feature vector for a given location as the mean of tfidf
-    tfs = tfidf.fit_transform(docs_t_collection.tokens)
     loc_feats = {}
     for loc in all_locations:
-        loc_feats[loc] = tfidf.transform(mega_docs[loc]).mean(0)
+        loc_feats[loc] = tfidf.transform(mega_raws[loc]).mean(0)
         classifier.add_training_data(loc_feats[loc],
-                                     classifier.le.transform([loc]))
-
+                                     classifier.le.transform([loc])[0])
+    classifier.fit()
 
     # Load test data into Python Dict
     test = sys.argv[2] if len(sys.argv) > 2 else 'data/test.json'
@@ -67,15 +63,16 @@ if __name__ == "__main__":
         test_tweets = json.load(f)
 
 
-    docs_terms_test, docs_t_collection_test = preprocess.setup_doc_collection(test_tweets)
+    test_raw = preprocess.setup_doc_collection(test_tweets)
 
-    prediction = {}
+    predictions = {}
+    predictions_loc = {}
+    for t_id in test_raw.keys():
+        test_doc_feat = tfidf.transform([test_raw[t_id]])
+        predictions[t_id] = classifier.predict(test_doc_feat.todense())
 
-    for t_id in docs_terms_test.keys():
-        test_doc_feat = tfidf.transform(docs_terms_test[t_id])
-        prediction[t_id] = classifier.predict(test_doc_feat, False)
-
-
+    for k, v in predictions.iteritems():
+        predictions_loc[k] = classifier.le.inverse_transform(v)
 
 
 

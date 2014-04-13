@@ -41,7 +41,7 @@ class Classifier:
                 self.add_training_data(obs[ii], target[ii])
 
     def fit(self, scale=True):
-        self.training_data = np.array(self.training_data)
+        self.training_data = np.array(self.training_data).squeeze()
         self.training_targets = np.array(self.training_targets)
         if scale:
             # self.scaler.fit(np.float(self.training_data))
