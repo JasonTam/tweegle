@@ -20,53 +20,52 @@ import preprocess
 import features
 import classification
 
+if __name__ == "__main__":
 
+    import sys
 
-# Load train data into Python Dict
-dir_data = './data'
-filename = 'train.json'
-filepath = os.path.join(dir_data, filename)
-with open(filepath, 'r') as f:
-    tweets = json.load(f)
+    train = sys.argv[1] if len(sys.argv) > 1 else 'data/train.json'
 
-# Preprocess data from json into data structs
-docs_terms, docs_t_collection = preprocess.setup_doc_collection(tweets)
+    # Load train data into Python Dict
+    with open(train, 'r') as f:
+        tweets = json.load(f)
 
-# Getting location info
-targets = preprocess.get_target_map(tweets)
-loc_to_id = defaultdict(set)
-for k, v in targets.iteritems():
-    loc_to_id[v].add(k)
-all_locations = sorted(loc_to_id.keys())
+    # Preprocess data from json into data structs
+    docs_terms, docs_t_collection = preprocess.setup_doc_collection(tweets)
 
-classifier = classification.Classifier()
-classifier.le.fit(all_locations)
+    # Getting location info
+    targets = preprocess.get_target_map(tweets)
+    loc_to_id = defaultdict(set)
+    for k, v in targets.iteritems():
+        loc_to_id[v].add(k)
+    all_locations = sorted(loc_to_id.keys())
 
-# Combine tweets from same location
-mega_docs = {loc:
-             list(itertools.chain(
-                 *[docs_terms[id].tokens for id in loc_to_id[loc]]
-             ))
-             for loc in all_locations
-            }
+    classifier = classification.Classifier()
+    classifier.le.fit(all_locations)
 
-tfidf = TfidfVectorizer(stop_words='english')
+    # Combine tweets from same location
+    mega_docs = {loc:
+                 list(itertools.chain(
+                     *[docs_terms[id].tokens for id in loc_to_id[loc]]
+                 ))
+                 for loc in all_locations
+                }
 
-# Get feature vector for a given location as the mean of tfidf
-tfs = tfidf.fit_transform(docs_t_collection.tokens)
-loc_feats = {}
-for loc in all_locations:
-    loc_feats[loc] = tfidf.transform(mega_docs[loc]).mean(0)
-    classifier.add_training_data(loc_feats[loc],
-                                 classifier.le.transform([loc]))
+    tfidf = TfidfVectorizer(stop_words='english')
 
+    # Get feature vector for a given location as the mean of tfidf
+    tfs = tfidf.fit_transform(docs_t_collection.tokens)
+    loc_feats = {}
+    for loc in all_locations:
+        loc_feats[loc] = tfidf.transform(mega_docs[loc]).mean(0)
+        classifier.add_training_data(loc_feats[loc],
+                                     classifier.le.transform([loc]))
 
+    test = sys.argv[2] if len(sys.argv) > 2 else 'data/test.json'
 
-# Load test data into Python Dict
-test_filename = 'test.json'
-test_filepath = os.path.join(dir_data, filename)
-with open(test_filepath, 'r') as f:
-    test_tweets = json.load(f)
+    # Load test data into Python Dict
+    with open(test, 'r') as f:
+        test_tweets = json.load(f)
 
 
 
