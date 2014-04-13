@@ -21,6 +21,7 @@ def stem_tokens(tokens, stemmer=nltk.PorterStemmer()):
         stemmed.append(stemmer.stem(item))
     return stemmed
 
+
 def tokenize(raw, toknzr=PunktWordTokenizer()):
     tokens = toknzr.tokenize(raw)
     stems = stem_tokens(tokens)
