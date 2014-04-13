@@ -20,10 +20,11 @@ def fix_unicode(text):
 def setup_doc_collection(tweets):
     docs_text = {}
     for tweet in tweets:
-        raw = fix_unicode(tweet['text'])
-        # raw = tweet['text']
+        # raw = fix_unicode(tweet['text'])
+        raw = tweet['text']
         low = raw.lower()
-        docs_text[tweet['id']] = low.translate(None, string.punctuation)
+        # docs_text[tweet['id']] = low.translate(None, string.punctuation)
+        docs_text[tweet['id']] = low
     return docs_text
 
 

@@ -17,13 +17,12 @@ class Classifier:
         self.le = preprocessing.LabelEncoder()
         self.scaler = preprocessing.StandardScaler()
         #Classifier Type
-        self.classifier = svm.SVC()
-        self.name = 'SVM'
+        self.classifier = svm.SVC(); self.name = 'SVM'
         # self.classifier = svm.SVC(kernel='rbf'); self.name = 'SVM'
         # self.classifier = RandomForestClassifier()
         # self.name = 'Rand Forest'
         #self.classifier = AdaBoostClassifier(); self.name = 'Adaboost'
-        #self.classifier = neighbors.KNeighborsClassifier(); self.name = 'KNN'
+        # self.classifier = neighbors.KNeighborsClassifier(); self.name = 'KNN'
 
     # TODO: this is kind of bad practice
     @property
