@@ -11,7 +11,7 @@ from nltk.stem.porter import PorterStemmer
 from nltk.tokenize.punkt import PunktWordTokenizer
 
 def prune_unicode(text):
-    return ''.join([i if ord(i) < 128 else '' for i in text])
+    return ''.join([i if ord(i) < 128 else '?' for i in text])
 
 def setup_doc_collection(tweets,
                          toknzr=PunktWordTokenizer(),
@@ -26,7 +26,8 @@ def setup_doc_collection(tweets,
     # Setup Text docs to contain frequent terms
     docs_terms = {}
     for tweet in tweets:
-        raw = prune_unicode(tweet['text'])
+        # raw = prune_unicode(tweet['text'])
+        raw = tweet['text']
         raw_tokens = toknzr.tokenize(raw)
 
         terms = get_terms(raw_tokens)

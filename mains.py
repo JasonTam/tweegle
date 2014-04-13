@@ -61,12 +61,29 @@ for loc in all_locations:
                                  classifier.le.transform([loc]))
 
 
-
 # Load test data into Python Dict
 test_filename = 'test.json'
 test_filepath = os.path.join(dir_data, filename)
 with open(test_filepath, 'r') as f:
     test_tweets = json.load(f)
+
+
+docs_terms_test, docs_t_collection_test = preprocess.setup_doc_collection(test_tweets)
+
+prediction = {}
+for t_id in docs_terms_test.keys():
+    test_doc_feat = tfidf.transform(docs_terms_test[t_id])
+    prediction[t_id] = classifier.predict(test_doc_feat, False)
+
+
+
+
+
+
+
+
+
+
 
 
 
