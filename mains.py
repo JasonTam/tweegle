@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
 
     # Load test data into Python Dict
-    test = sys.argv[1] if len(sys.argv) > 1 else 'data/test.json'
+    test = sys.argv[2] if len(sys.argv) > 1 else 'data/test.json'
     with open(test, 'r') as f:
         test_tweets = json.load(f)
 
