@@ -38,7 +38,7 @@ def setup_doc_collection(tweets,
 
 def get_target_map(tweets):
     tweet_classes = {
-        tweet['id']: tweet['place']['country_code']
+        tweet['id']:tweet['place']['country_code']
         for tweet in tweets
     }
     return tweet_classes
