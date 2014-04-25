@@ -7,6 +7,7 @@ from nltk.corpus import PlaintextCorpusReader
 from nltk import text
 from sklearn.cross_validation import KFold
 from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize.punkt import PunktWordTokenizer
 from sklearn import preprocessing
@@ -20,6 +21,8 @@ import preprocess
 import features
 import classification
 
+debug = 1
+
 if __name__ == "__main__":
 
     # Load train data into Python Dict
@@ -30,6 +33,8 @@ if __name__ == "__main__":
         tweets = json.load(f)
 
     # Preprocess data from json into data structs
+    if debug:
+        print '\nPreprocessing: Setting up Train Doc Collection'
     train_raw = preprocess.setup_doc_collection(tweets)
 
     # Getting location info
@@ -51,7 +56,11 @@ if __name__ == "__main__":
     tfidf = features.fit_tfidf(train_raw.values())
 
     loc_feats = {}
-    for loc in all_locations:
+    for ii, loc in enumerate(all_locations):
+        if debug:
+            dbg_str = '\rTraining: ' + loc + '[' + str(ii + 1) + '/' + str(len(all_locations)) + ']'
+            sys.stdout.write(dbg_str)
+            sys.stdout.flush()
         loc_feats[loc] = tfidf.transform(mega_raws[loc]).mean(0)
         classifier.add_training_data(loc_feats[loc],
                                      classifier.le.transform([loc])[0])
@@ -62,21 +71,41 @@ if __name__ == "__main__":
     with open(test, 'r') as f:
         test_tweets = json.load(f)
 
-
+    if debug:
+        print '\nPreprocessing: Setting up Test Doc Collection'
     test_raw = preprocess.setup_doc_collection(test_tweets)
 
     predictions = {}
     predictions_loc = {}
-    for t_id in test_raw.keys():
-        test_doc_feat = tfidf.transform([test_raw[t_id]])
-        predictions[t_id] = classifier.predict(test_doc_feat.todense())
+    test_doc_feat = {}
+    for ii, t_id in enumerate(test_raw.keys()):
+        if debug:
+            dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
+            sys.stdout.write(dbg_str)
+            sys.stdout.flush()
+        test_doc_feat[t_id] = tfidf.transform([test_raw[t_id]])
+        predictions[t_id] = classifier.predict(test_doc_feat[t_id].todense())
 
     for k, v in predictions.iteritems():
         predictions_loc[k] = classifier.le.inverse_transform(v)
 
+    # Cosine Similarity for every possibility
+    for ii, t_id in enumerate(test_raw.keys()):
+        for jj, loc in enumerate(all_locations):
+            if debug:
+                dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']' + \
+                          ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
+                sys.stdout.write(dbg_str)
+                sys.stdout.flush()
+            sim = cosine_similarity(test_doc_feat[t_id], loc_feats[loc])
 
 
-
+# 455147014511403008 is an example of a tweet we should get right
+# (NYC)
+def get_tweet_with_id(id):
+    q = [test_tweets[ii] for ii in range(len(test_tweets))
+         if test_tweets[ii]['id'] == id]
+    return q[0]
 
 
 

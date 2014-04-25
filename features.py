@@ -32,7 +32,8 @@ def fit_tfidf(doc_list):
     # should be run on all training docs (all locations)
     tfidf = TfidfVectorizer(tokenizer=tokenize,
                             stop_words='english',
-                            lowercase=False)
+                            lowercase=True,
+                            sublinear_tf=True)
     tfs = tfidf.fit_transform(doc_list)
     return tfidf
 

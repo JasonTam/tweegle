@@ -29,7 +29,6 @@ class Classifier:
     def x(self):
         return self._x
 
-
     def add_training_data(self, obs, target, indices=0):
         if not indices:
             self.training_data.append(np.array(obs))
@@ -43,10 +42,8 @@ class Classifier:
         self.training_data = np.array(self.training_data).squeeze()
         self.training_targets = np.array(self.training_targets)
         if scale:
-            # self.scaler.fit(np.float(self.training_data))
             self.scaler.fit(self.training_data)
-            #self.training_data = self.scaler.transform(self.training_data)
-            self.training_data = preprocessing.scale(self.training_data)
+            self.training_data = self.scaler.transform(self.training_data)
         self.classifier.fit(self.training_data, self.training_targets)
 
     def preprocess(self):
@@ -55,7 +52,6 @@ class Classifier:
     def predict(self, data, scale=True):
         data = np.array(data)
         if scale:
-            #data = self.scaler.transform(data)
-            data = preprocessing.scale(data)
+            data = self.scaler.transform(data)
         return self.classifier.predict(data)
 

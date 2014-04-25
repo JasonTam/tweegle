@@ -17,6 +17,7 @@ def fix_unicode(text):
     # return ''.join([i if ord(i) < 128 else 'u' for i in text])
     return unicodedata.normalize('NFKD', text).encode('ascii', 'ignore')
 
+
 def setup_doc_collection(tweets):
     docs_text = {}
     for tweet in tweets:
@@ -31,6 +32,7 @@ def setup_doc_collection(tweets):
 def get_target_map(tweets):
     tweet_classes = {
         tweet['id']: tweet['place']['country_code']
+        # tweet['id']: tweet['place']['name']
         for tweet in tweets
     }
     return tweet_classes
