@@ -23,6 +23,19 @@ import classification
 
 debug = 1
 
+
+# 455147014511403008 is an example of a tweet we should get right
+# (NYC)
+# test_tweets
+def get_tweet_with_id(tweet_list, id):
+    """
+    Just a function used for debugging
+    """
+    q = [tweet_list[ii] for ii in range(len(tweet_list))
+         if tweet_list[ii]['id'] == id]
+    return q[0]
+
+
 if __name__ == "__main__":
 
     # Load train data into Python Dict
@@ -89,6 +102,8 @@ if __name__ == "__main__":
     for k, v in predictions.iteritems():
         predictions_loc[k] = classifier.le.inverse_transform(v)
 
+    sim = {}
+    sim_pred = {}
     # Cosine Similarity for every possibility
     for ii, t_id in enumerate(test_raw.keys()):
         for jj, loc in enumerate(all_locations):
@@ -97,18 +112,22 @@ if __name__ == "__main__":
                           ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
                 sys.stdout.write(dbg_str)
                 sys.stdout.flush()
-            sim = cosine_similarity(test_doc_feat[t_id], loc_feats[loc])
+            sim[loc] = cosine_similarity(test_doc_feat[t_id], loc_feats[loc])
+        sim_pred[t_id] = max(sim, key=sim.get)
 
 
-# 455147014511403008 is an example of a tweet we should get right
-# (NYC)
-def get_tweet_with_id(id):
-    q = [test_tweets[ii] for ii in range(len(test_tweets))
-         if test_tweets[ii]['id'] == id]
-    return q[0]
+### TODO:SHOULD WE MOVE THIS SOMEWHERE ELSE???
+# Validation
+from sklearn.metrics import classification_report
+from sklearn.metrics import accuracy_score
 
+y_pred, y_truth = zip(*[(sim_pred[tweet['id']], tweet['place']['country_code'])
+                        for tweet in test_tweets])
+q = classification_report(y_truth, y_pred)
 
+acc = accuracy_score(y_truth, y_pred)
 
+# [list(t) for t in zip(*l)]
 
 
 

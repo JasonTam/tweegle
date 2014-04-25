@@ -55,3 +55,4 @@ class Classifier:
             data = self.scaler.transform(data)
         return self.classifier.predict(data)
 
+
