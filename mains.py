@@ -46,6 +46,7 @@ if __name__ == "__main__":
     with open(train, 'r') as f:
         tweets = json.load(f)
 
+# [PREPROCESS]---------------------------------------
     # Preprocess data from json into data structs
     if debug:
         print '\nPreprocessing: Setting up Train Doc Collection'
@@ -61,34 +62,38 @@ if __name__ == "__main__":
     classifier = classification.Classifier()
     classifier.le.fit(all_locations)
 
+# [MEGADOCS]---------------------------------------
     # Combine tweets from same location
     mega_raws = {
         loc: [train_raw[t_id] for t_id in loc_to_id[loc]]
         for loc in all_locations
     }
 
+# [TFIDF TRAIN MEGADOCS]---------------------------------------
     tfidf = features.fit_tfidf(train_raw.values())
 
     loc_feats = {}
     for ii, loc in enumerate(all_locations):
         if debug:
-            dbg_str = '\rTFIDF Train: ' + loc + '[' + str(ii + 1) + '/' + str(len(all_locations)) + ']'
+            dbg_str = '\rTFIDF Train MegaDocs: ' + loc + '[' + str(ii + 1) + '/' + str(len(all_locations)) + ']'
             sys.stdout.write(dbg_str)
             sys.stdout.flush()
         loc_feats[loc] = tfidf.transform(mega_raws[loc]).mean(0)
-    #     classifier.add_training_data(loc_feats[loc],
-    #                                  classifier.le.transform([loc])[0])
-    # classifier.fit()
 
+
+# [TFIDF ON TRAINING TWEETS]---------------------------------------
     train_doc_tfidf_feat = {}
     for ii, t_id in enumerate(train_raw.keys()):
         if debug:
-            dbg_str = '\rTFIDF: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(train_raw)) + ']'
+            dbg_str = '\rTFIDF Train Tweets: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(train_raw)) + ']'
             sys.stdout.write(dbg_str)
             sys.stdout.flush()
         train_doc_tfidf_feat[t_id] = tfidf.transform([train_raw[t_id]])
-    _, sim_train = features.cosine_sim(
-            train_raw, train_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
+
+        classifier.add_training_data(
+            train_doc_tfidf_feat[t_id],
+            classifier.le.transform([targets[t_id]])[0])
+    classifier.fit()
 
 
 ## --------------[ TESTING ]---------------
@@ -112,17 +117,17 @@ if __name__ == "__main__":
     sim_pred, sim_test = features.cosine_sim(
         test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
 
-    # predictions = {}
-    # predictions_loc = {}
-    # for ii, t_id in enumerate(test_raw.keys()):
-    #     if debug:
-    #         dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
-    #         sys.stdout.write(dbg_str)
-    #         sys.stdout.flush()
-    #     predictions[t_id] = classifier.predict(test_doc_tfidf_feat[t_id].todense())
-    #
-    # for k, v in predictions.iteritems():
-    #     predictions_loc[k] = classifier.le.inverse_transform(v)
+    predictions = {}
+    predictions_loc = {}
+    for ii, t_id in enumerate(test_raw.keys()):
+        if debug:
+            dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
+            sys.stdout.write(dbg_str)
+            sys.stdout.flush()
+        predictions[t_id] = classifier.predict(test_doc_tfidf_feat[t_id].todense())
+
+    for k, v in predictions.iteritems():
+        predictions_loc[k] = classifier.le.inverse_transform(v)
 
 
 print '\n'
