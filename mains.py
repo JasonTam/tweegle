@@ -20,6 +20,7 @@ import itertools
 import preprocess
 import features
 import classification
+import validate
 
 debug = 1
 
@@ -102,6 +103,7 @@ if __name__ == "__main__":
     for k, v in predictions.iteritems():
         predictions_loc[k] = classifier.le.inverse_transform(v)
 
+    print '\nCosine Sim:'
     sim = {}
     sim_pred = {}
     # Cosine Similarity for every possibility
@@ -116,19 +118,9 @@ if __name__ == "__main__":
         sim_pred[t_id] = max(sim, key=sim.get)
 
 
-### TODO:SHOULD WE MOVE THIS SOMEWHERE ELSE???
-# Validation
-from sklearn.metrics import classification_report
-from sklearn.metrics import accuracy_score
 
+# Validation
 y_pred, y_truth = zip(*[(sim_pred[tweet['id']], tweet['place']['country_code'])
                         for tweet in test_tweets])
-q = classification_report(y_truth, y_pred)
-
-acc = accuracy_score(y_truth, y_pred)
-
-# [list(t) for t in zip(*l)]
-
-
-
-
+validator = validate.Validator(y_truth, y_pred)
+print validator.acc
