@@ -10,6 +10,8 @@ from sklearn.cross_validation import KFold
 from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem.porter import PorterStemmer
 from nltk.tokenize.punkt import PunktWordTokenizer
+from sklearn.metrics.pairwise import cosine_similarity
+import sys
 
 import os
 import time
@@ -36,4 +38,28 @@ def fit_tfidf(doc_list):
                             sublinear_tf=True)
     tfs = tfidf.fit_transform(doc_list)
     return tfidf
+
+
+def cosine_sim(test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=False):
+    sim = {}
+    sim_pred = {}
+    # Cosine Similarity for every possibility
+    for ii, t_id in enumerate(test_raw.keys()):
+        for jj, loc in enumerate(all_locations):
+            if debug:
+                dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']' + \
+                          ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
+                sys.stdout.write(dbg_str)
+                sys.stdout.flush()
+            sim[loc] = cosine_similarity(test_doc_tfidf_feat[t_id], loc_feats[loc])
+        sim_pred[t_id] = max(sim, key=sim.get)
+    return sim_pred
+
+
+
+
+
+
+
+
 

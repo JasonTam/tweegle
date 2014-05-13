@@ -22,7 +22,7 @@ import features
 import classification
 import validate
 
-debug = 1
+debug = True
 
 
 # 455147014511403008 is an example of a tweet we should get right
@@ -89,36 +89,47 @@ if __name__ == "__main__":
         print '\nPreprocessing: Setting up Test Doc Collection'
     test_raw = preprocess.setup_doc_collection(test_tweets)
 
-    predictions = {}
-    predictions_loc = {}
-    test_doc_feat = {}
+    test_doc_tfidf_feat = {}
     for ii, t_id in enumerate(test_raw.keys()):
         if debug:
-            dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
+            dbg_str = '\rTFIDF: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
             sys.stdout.write(dbg_str)
             sys.stdout.flush()
-        test_doc_feat[t_id] = tfidf.transform([test_raw[t_id]])
-        predictions[t_id] = classifier.predict(test_doc_feat[t_id].todense())
-
-    for k, v in predictions.iteritems():
-        predictions_loc[k] = classifier.le.inverse_transform(v)
-
-    print '\nCosine Sim:'
-    sim = {}
-    sim_pred = {}
-    # Cosine Similarity for every possibility
-    for ii, t_id in enumerate(test_raw.keys()):
-        for jj, loc in enumerate(all_locations):
-            if debug:
-                dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']' + \
-                          ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
-                sys.stdout.write(dbg_str)
-                sys.stdout.flush()
-            sim[loc] = cosine_similarity(test_doc_feat[t_id], loc_feats[loc])
-        sim_pred[t_id] = max(sim, key=sim.get)
+        test_doc_tfidf_feat[t_id] = tfidf.transform([test_raw[t_id]])
 
 
+    sim_pred = features.cosine_sim(
+        test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
 
+    # sim = {}
+    # sim_pred = {}
+    # # Cosine Similarity for every possibility
+    # for ii, t_id in enumerate(test_raw.keys()):
+    #     for jj, loc in enumerate(all_locations):
+    #         if debug:
+    #             dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']' + \
+    #                       ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
+    #             sys.stdout.write(dbg_str)
+    #             sys.stdout.flush()
+    #         sim[loc] = cosine_similarity(test_doc_tfidf_feat[t_id], loc_feats[loc])
+    #     sim_pred[t_id] = max(sim, key=sim.get)
+
+
+
+    # predictions = {}
+    # predictions_loc = {}
+    # for ii, t_id in enumerate(test_raw.keys()):
+    #     if debug:
+    #         dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
+    #         sys.stdout.write(dbg_str)
+    #         sys.stdout.flush()
+    #     predictions[t_id] = classifier.predict(test_doc_tfidf_feat[t_id].todense())
+    #
+    # for k, v in predictions.iteritems():
+    #     predictions_loc[k] = classifier.le.inverse_transform(v)
+
+
+print '\n'
 # Validation
 y_pred, y_truth = zip(*[(sim_pred[tweet['id']], tweet['place']['country_code'])
                         for tweet in test_tweets])

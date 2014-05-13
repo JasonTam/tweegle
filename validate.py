@@ -9,6 +9,7 @@ class Validator():
         self.pred = y_pred
         self.acc = None
         self.report = None
+        self.get_stats()
 
     def get_stats(self):
         self.acc = accuracy_score(self.truth, self.pred)
