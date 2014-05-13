@@ -91,7 +91,7 @@ if __name__ == "__main__":
         train_doc_tfidf_feat[t_id] = tfidf.transform([train_raw[t_id]])
 
         classifier.add_training_data(
-            train_doc_tfidf_feat[t_id],
+            train_doc_tfidf_feat[t_id].todense(),
             classifier.le.transform([targets[t_id]])[0])
     classifier.fit()
 
