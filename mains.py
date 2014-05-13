@@ -72,14 +72,26 @@ if __name__ == "__main__":
     loc_feats = {}
     for ii, loc in enumerate(all_locations):
         if debug:
-            dbg_str = '\rTraining: ' + loc + '[' + str(ii + 1) + '/' + str(len(all_locations)) + ']'
+            dbg_str = '\rTFIDF Train: ' + loc + '[' + str(ii + 1) + '/' + str(len(all_locations)) + ']'
             sys.stdout.write(dbg_str)
             sys.stdout.flush()
         loc_feats[loc] = tfidf.transform(mega_raws[loc]).mean(0)
-        classifier.add_training_data(loc_feats[loc],
-                                     classifier.le.transform([loc])[0])
-    classifier.fit()
+    #     classifier.add_training_data(loc_feats[loc],
+    #                                  classifier.le.transform([loc])[0])
+    # classifier.fit()
 
+    train_doc_tfidf_feat = {}
+    for ii, t_id in enumerate(train_raw.keys()):
+        if debug:
+            dbg_str = '\rTFIDF: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(train_raw)) + ']'
+            sys.stdout.write(dbg_str)
+            sys.stdout.flush()
+        train_doc_tfidf_feat[t_id] = tfidf.transform([train_raw[t_id]])
+    _, sim_train = features.cosine_sim(
+            train_raw, train_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
+
+
+## --------------[ TESTING ]---------------
     # Load test data into Python Dict
     test = sys.argv[2] if len(sys.argv) > 2 else 'data/test.json'
     with open(test, 'r') as f:
@@ -97,24 +109,8 @@ if __name__ == "__main__":
             sys.stdout.flush()
         test_doc_tfidf_feat[t_id] = tfidf.transform([test_raw[t_id]])
 
-
-    sim_pred = features.cosine_sim(
+    sim_pred, sim_test = features.cosine_sim(
         test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
-
-    # sim = {}
-    # sim_pred = {}
-    # # Cosine Similarity for every possibility
-    # for ii, t_id in enumerate(test_raw.keys()):
-    #     for jj, loc in enumerate(all_locations):
-    #         if debug:
-    #             dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']' + \
-    #                       ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
-    #             sys.stdout.write(dbg_str)
-    #             sys.stdout.flush()
-    #         sim[loc] = cosine_similarity(test_doc_tfidf_feat[t_id], loc_feats[loc])
-    #     sim_pred[t_id] = max(sim, key=sim.get)
-
-
 
     # predictions = {}
     # predictions_loc = {}

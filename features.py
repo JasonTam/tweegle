@@ -42,6 +42,7 @@ def fit_tfidf(doc_list):
 
 def cosine_sim(test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=False):
     sim = {}
+    sim_tweet = {}
     sim_pred = {}
     # Cosine Similarity for every possibility
     for ii, t_id in enumerate(test_raw.keys()):
@@ -52,8 +53,9 @@ def cosine_sim(test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=Fa
                 sys.stdout.write(dbg_str)
                 sys.stdout.flush()
             sim[loc] = cosine_similarity(test_doc_tfidf_feat[t_id], loc_feats[loc])
+        sim_tweet[t_id] = sim.values()
         sim_pred[t_id] = max(sim, key=sim.get)
-    return sim_pred
+    return sim_pred, sim_tweet
 
 
 
