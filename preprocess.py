@@ -29,6 +29,14 @@ def setup_doc_collection(tweets):
     return docs_text
 
 
+def get_time(tweets):
+    tweet_times = {
+        tweet['id']: tweet['time']
+        for tweet in tweets
+    }
+    return tweet_times
+
+
 def get_target_map(tweets):
     tweet_classes = {
         tweet['id']: tweet['place']['country_code']

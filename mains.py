@@ -52,6 +52,9 @@ if __name__ == "__main__":
         print '\nPreprocessing: Setting up Train Doc Collection'
     train_raw = preprocess.setup_doc_collection(tweets)
 
+    # Getting time info
+    # tweet_times = preprocess.get_time(tweets)
+
     # Getting location info
     targets = preprocess.get_target_map(tweets)
     loc_to_id = defaultdict(set)
@@ -91,10 +94,11 @@ if __name__ == "__main__":
             sys.stdout.flush()
         train_doc_tfidf_feat[t_id] = tfidf.transform([train_raw[t_id]])
 
-        classifier.add_training_data(
-            train_doc_tfidf_feat[t_id].todense(),
-            classifier.le.transform([targets[t_id]])[0])
-    classifier.fit()
+    #     classifier.add_training_data(
+    #         train_doc_tfidf_feat[t_id].todense(),
+    #         classifier.le.transform([targets[t_id]])[0])
+    # print '\nFitting Classifier'
+    # classifier.fit()
 
 
 ## --------------[ TESTING ]---------------
@@ -119,18 +123,18 @@ if __name__ == "__main__":
     sim_pred, sim_test = features.cosine_sim(
         test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
 
-    print '\nPredictions based on SVM'
-    predictions = {}
-    predictions_loc = {}
-    for ii, t_id in enumerate(test_raw.keys()):
-        if debug:
-            dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
-            sys.stdout.write(dbg_str)
-            sys.stdout.flush()
-        predictions[t_id] = classifier.predict(test_doc_tfidf_feat[t_id].todense())
-
-    for k, v in predictions.iteritems():
-        predictions_loc[k] = classifier.le.inverse_transform(v)
+    # print '\nPredictions based on SVM'
+    # predictions = {}
+    # predictions_loc = {}
+    # for ii, t_id in enumerate(test_raw.keys()):
+    #     if debug:
+    #         dbg_str = '\rPredicting: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
+    #         sys.stdout.write(dbg_str)
+    #         sys.stdout.flush()
+    #     predictions[t_id] = classifier.predict(test_doc_tfidf_feat[t_id].todense())
+    #
+    # for k, v in predictions.iteritems():
+    #     predictions_loc[k] = classifier.le.inverse_transform(v)
 
 
 print '\n'

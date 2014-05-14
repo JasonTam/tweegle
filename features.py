@@ -35,7 +35,8 @@ def fit_tfidf(doc_list):
     tfidf = TfidfVectorizer(tokenizer=tokenize,
                             stop_words='english',
                             lowercase=True,
-                            sublinear_tf=True)
+                            sublinear_tf=True,
+                            smooth_idf=True)
     tfs = tfidf.fit_transform(doc_list)
     return tfidf
 
