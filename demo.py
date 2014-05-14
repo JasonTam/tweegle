@@ -8,8 +8,10 @@ import features
 class ProcessTweets(tweepy.StreamListener):
     def __init__(self):
             # Save training
+        save_code_dict_path = './data/code_dict.p'
         save_xform_path = './data/tfidf.p'
         save_loc_feats_path = './data/loc_feats.p'
+        self.code_dict = pickle.load(open(save_code_dict_path, "rb"))
         self.tfidf = pickle.load(open(save_xform_path, "rb"))
         self.loc_feats = pickle.load(open(save_loc_feats_path, "rb"))
 
@@ -30,9 +32,10 @@ class ProcessTweets(tweepy.StreamListener):
                 info = stream.convert_tweet(tweet)
 
                 # Process tweet here
+                pred = self.predict(info['text'])
                 print 'Text:', info['text']
-                print 'Country:', info['place']['country_code']
-                print 'Prediction:', self.predict(info['text'])
+                print 'Country:', info['place']['country_code'], info['place']['country']
+                print 'Prediction:', pred, self.code_dict[pred]
 
                 raw_input('...')
                 return True  # True to continue

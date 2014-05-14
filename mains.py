@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # Load train data into Python Dict
     import sys
 
-    train = sys.argv[1] if len(sys.argv) > 1 else 'data/BIG.json'
+    train = sys.argv[1] if len(sys.argv) > 1 else 'data/2_50am.json'
     with open(train, 'r') as f:
         tweets = json.load(f)
 
@@ -62,6 +62,7 @@ if __name__ == "__main__":
     for k, v in targets.iteritems():
         loc_to_id[v].add(k)
     all_locations = sorted(loc_to_id.keys())
+    code_dict = preprocess.country_code_lookup(tweets, loc_to_id)
 
     classifier = classification.Classifier()
     classifier.le.fit(all_locations)
@@ -85,8 +86,10 @@ if __name__ == "__main__":
         loc_feats[loc] = tfidf.transform(mega_raws[loc]).mean(0)
 
     # Save training
+    save_code_dict_path = './data/code_dict.p'
     save_xform_path = './data/tfidf.p'
     save_loc_feats_path = './data/loc_feats.p'
+    pickle.dump(code_dict, open(save_code_dict_path, "wb"))
     pickle.dump(tfidf, open(save_xform_path, "wb"))
     pickle.dump(loc_feats, open(save_loc_feats_path, "wb"))
 

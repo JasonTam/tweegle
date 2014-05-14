@@ -29,6 +29,15 @@ def setup_doc_collection(tweets):
     return docs_text
 
 
+def country_code_lookup(tweets, loc_to_id):
+    country_code_dict = {}
+    for code in loc_to_id.keys():
+        country_code_dict[code] = \
+            [tweet['place']['country'] for tweet in tweets
+             if tweet['id'] == list(loc_to_id[code])[0]][0]
+    return country_code_dict
+
+
 def get_time(tweets):
     tweet_times = {
         tweet['id']: tweet['time']
@@ -45,8 +54,10 @@ def get_target_map(tweets):
     }
     return tweet_classes
 
+
 if __name__ == "__main__":
     import sys
+
     filename = sys.argv[1] if len(sys.argv) > 1 else 'data/data.json'
     with open(filename, 'r') as f:
         terms, collection = setup_doc_collection(json.load(f))
