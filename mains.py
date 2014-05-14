@@ -71,7 +71,7 @@ if __name__ == "__main__":
 
 # [TFIDF TRAIN MEGADOCS]---------------------------------------
     tfidf = features.fit_tfidf(train_raw.values())
-
+    print '\nTFIDF on Megadocs'
     loc_feats = {}
     for ii, loc in enumerate(all_locations):
         if debug:
@@ -83,6 +83,7 @@ if __name__ == "__main__":
 
 # [TFIDF ON TRAINING TWEETS]---------------------------------------
     train_doc_tfidf_feat = {}
+    print '\nTFIDF per training tweet'
     for ii, t_id in enumerate(train_raw.keys()):
         if debug:
             dbg_str = '\rTFIDF Train Tweets: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(train_raw)) + ']'
@@ -106,6 +107,7 @@ if __name__ == "__main__":
         print '\nPreprocessing: Setting up Test Doc Collection'
     test_raw = preprocess.setup_doc_collection(test_tweets)
 
+    print '\nTFIDF on test tweets (and classifying based on similarity)'
     test_doc_tfidf_feat = {}
     for ii, t_id in enumerate(test_raw.keys()):
         if debug:
@@ -117,6 +119,7 @@ if __name__ == "__main__":
     sim_pred, sim_test = features.cosine_sim(
         test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
 
+    print '\nPredictions based on SVM'
     predictions = {}
     predictions_loc = {}
     for ii, t_id in enumerate(test_raw.keys()):

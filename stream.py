@@ -1,8 +1,30 @@
 import json
 import tweepy
+from datetime import datetime
+import time
+
+
+def valid_tweet(tweet):
+    check_coord = 'coordinates' in tweet
+    check_place = 'place' in tweet
+    if check_place:
+        check_place = tweet['place'] is not None
+    check_reply = not tweet['in_reply_to_user_id']
+    check_rt = not tweet['retweeted']
+
+    return check_coord and check_place and check_reply and check_rt
+
+
+def convert_tweet(tweet):
+    info = {k: tweet[k] for k in ['id', 'coordinates', 'text', 'place']}
+    info['user'] = {k: tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone', 'lang']}
+    info['text'] = info['text'].encode('utf-8')
+    info['time'] = time.mktime(datetime.strptime(tweet['created_at'],
+                                                 '%a %b %d %H:%M:%S +0000 %Y').timetuple())
+    return info
+
 
 class SaveTweets(tweepy.StreamListener):
-
     def __init__(self, filename, limit):
         self.filename = filename
         self.limit = limit
@@ -21,11 +43,8 @@ class SaveTweets(tweepy.StreamListener):
             tweet = json.loads(data)
 
             # Ignore replies and retweets
-            if 'coordinates' in tweet and 'place' in tweet and not tweet['in_reply_to_user_id'] and not tweet['retweeted']:
-
-                info = {k:tweet[k] for k in ['id', 'coordinates', 'text', 'place']}
-                info['user'] = {k:tweet['user'][k] for k in ['location', 'name', 'screen_name', 'time_zone', 'lang']}
-                info['text'] = info['text'].encode('utf-8')
+            if valid_tweet(tweet):
+                info = convert_tweet(tweet)
 
                 self.tweets.append(info)
 
@@ -40,7 +59,6 @@ class SaveTweets(tweepy.StreamListener):
 
 
 if __name__ == "__main__":
-
     import secret
     import sys
 
