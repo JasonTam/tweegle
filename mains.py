@@ -16,6 +16,7 @@ import os
 import time
 from collections import defaultdict
 import itertools
+import pickle
 
 import preprocess
 import features
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     # Load train data into Python Dict
     import sys
 
-    train = sys.argv[1] if len(sys.argv) > 1 else 'data/train.json'
+    train = sys.argv[1] if len(sys.argv) > 1 else 'data/BIG.json'
     with open(train, 'r') as f:
         tweets = json.load(f)
 
@@ -83,16 +84,23 @@ if __name__ == "__main__":
             sys.stdout.flush()
         loc_feats[loc] = tfidf.transform(mega_raws[loc]).mean(0)
 
+    # Save training
+    save_xform_path = './data/tfidf.p'
+    save_loc_feats_path = './data/loc_feats.p'
+    pickle.dump(tfidf, open(save_xform_path, "wb"))
+    pickle.dump(loc_feats, open(save_loc_feats_path, "wb"))
+
+
 
 # [TFIDF ON TRAINING TWEETS]---------------------------------------
-    train_doc_tfidf_feat = {}
-    print '\nTFIDF per training tweet'
-    for ii, t_id in enumerate(train_raw.keys()):
-        if debug:
-            dbg_str = '\rTFIDF Train Tweets: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(train_raw)) + ']'
-            sys.stdout.write(dbg_str)
-            sys.stdout.flush()
-        train_doc_tfidf_feat[t_id] = tfidf.transform([train_raw[t_id]])
+#     train_doc_tfidf_feat = {}
+#     print '\nTFIDF per training tweet'
+#     for ii, t_id in enumerate(train_raw.keys()):
+#         if debug:
+#             dbg_str = '\rTFIDF Train Tweets: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(train_raw)) + ']'
+#             sys.stdout.write(dbg_str)
+#             sys.stdout.flush()
+#         train_doc_tfidf_feat[t_id] = tfidf.transform([train_raw[t_id]])
 
     #     classifier.add_training_data(
     #         train_doc_tfidf_feat[t_id].todense(),
@@ -120,8 +128,8 @@ if __name__ == "__main__":
             sys.stdout.flush()
         test_doc_tfidf_feat[t_id] = tfidf.transform([test_raw[t_id]])
 
-    sim_pred, sim_test = features.cosine_sim(
-        test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=debug)
+    sim_pred, sim_test = features.cosine_sim_all(
+        test_raw, test_doc_tfidf_feat, loc_feats, debug=debug)
 
     # print '\nPredictions based on SVM'
     # predictions = {}

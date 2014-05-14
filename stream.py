@@ -29,6 +29,9 @@ class SaveTweets(tweepy.StreamListener):
         self.filename = filename
         self.limit = limit
         self.tweets = []
+        self.debug = True
+        self.batch_size = 100
+        self.num_saved = 0
 
     def on_status(self, tweet):
         pass
@@ -47,11 +50,16 @@ class SaveTweets(tweepy.StreamListener):
                 info = convert_tweet(tweet)
 
                 self.tweets.append(info)
+                n_tweets = len(self.tweets)
+                if self.debug:
+                    dbg_str = '\r# Tweets: ' + str(n_tweets)
+                    sys.stdout.write(dbg_str)
+                    sys.stdout.flush()
 
-                if len(self.tweets) < self.limit:
-
-                    with open(self.filename, 'w') as f:
-                        json.dump(self.tweets, f)
+                if n_tweets < self.limit:
+                    if (n_tweets % self.batch_size) == 0:
+                        with open(self.filename, 'w') as f:
+                            json.dump(self.tweets, f)
 
                     return True
                 else:
@@ -73,3 +81,16 @@ if __name__ == "__main__":
 
     locations = [-180, -90, 180, 90]
     streamer.filter(locations=locations)
+
+# PATCH?
+import httplib
+
+def patch_http_response_read(func):
+    def inner(*args):
+        try:
+            return func(*args)
+        except httplib.IncompleteRead, e:
+            return e.partial
+
+    return inner
+httplib.HTTPResponse.read = patch_http_response_read(httplib.HTTPResponse.read)

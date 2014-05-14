@@ -1,8 +1,18 @@
 import stream
 import tweepy
 import json
+import pickle
+import features
+
 
 class ProcessTweets(tweepy.StreamListener):
+    def __init__(self):
+            # Save training
+        save_xform_path = './data/tfidf.p'
+        save_loc_feats_path = './data/loc_feats.p'
+        self.tfidf = pickle.load(open(save_xform_path, "rb"))
+        self.loc_feats = pickle.load(open(save_loc_feats_path, "rb"))
+
     def on_status(self, tweet):
         pass
 
@@ -20,9 +30,18 @@ class ProcessTweets(tweepy.StreamListener):
                 info = stream.convert_tweet(tweet)
 
                 # Process tweet here
-                print info
+                print 'Text:', info['text']
+                print 'Country:', info['place']['country_code']
+                print 'Prediction:', self.predict(info['text'])
 
-                return True # True to contineu
+                raw_input('...')
+                return True  # True to continue
+
+    def predict(self, info_text):
+        feat = self.tfidf.transform([info_text])
+        pred, sims = features.cosine_sim_single(feat, self.loc_feats)
+        return pred
+
 
 
 if __name__ == "__main__":

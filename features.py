@@ -41,24 +41,32 @@ def fit_tfidf(doc_list):
     return tfidf
 
 
-def cosine_sim(test_raw, test_doc_tfidf_feat, all_locations, loc_feats, debug=False):
+def cosine_sim_all(test_raw, test_doc_tfidf_feat, loc_feats, debug=False):
     sim = {}
     sim_tweet = {}
     sim_pred = {}
     # Cosine Similarity for every possibility
     for ii, t_id in enumerate(test_raw.keys()):
-        for jj, loc in enumerate(all_locations):
-            if debug:
-                dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']' + \
-                          ' | ' + loc + '[' + str(jj + 1) + '/' + str(len(all_locations)) + ']'
-                sys.stdout.write(dbg_str)
-                sys.stdout.flush()
-            sim[loc] = cosine_similarity(test_doc_tfidf_feat[t_id], loc_feats[loc])
-        sim_tweet[t_id] = sim.values()
-        sim_pred[t_id] = max(sim, key=sim.get)
+        if debug:
+            dbg_str = '\rCosine Sim: ' + str(t_id) + '[' + str(ii + 1) + '/' + str(len(test_raw)) + ']'
+            sys.stdout.write(dbg_str)
+            sys.stdout.flush()
+
+        sim_pred[t_id], sim_tweet[t_id] = cosine_sim_single(
+            test_doc_tfidf_feat[t_id], loc_feats
+        )
     return sim_pred, sim_tweet
 
 
+def cosine_sim_single(doc_tfidf_feat, loc_feats):
+    all_locations = loc_feats.keys()
+    sim = {}
+    for jj, loc in enumerate(all_locations):
+        sim[loc] = cosine_similarity(doc_tfidf_feat, loc_feats[loc])
+
+    sims = sim.values()
+    pred = max(sim, key=sim.get)
+    return pred, sims
 
 
 
