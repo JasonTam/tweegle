@@ -36,7 +36,8 @@ def fit_tfidf(doc_list):
                             stop_words='english',
                             lowercase=True,
                             sublinear_tf=True,
-                            smooth_idf=True)
+                            smooth_idf=True,
+                            ngram_range=(1, 2))
     tfs = tfidf.fit_transform(doc_list)
     return tfidf
 
